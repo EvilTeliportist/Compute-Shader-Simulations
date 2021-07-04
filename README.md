@@ -6,11 +6,11 @@ This is an implementation of various simulations through Unity and their compute
 - Android, Linux, and Windows: [Vulkan](https://www.khronos.org/vulkan/)
 - [OpenGL](https://www.opengl.org/) 4.3^ for Windows and
 
-## Slime Molds
+## Slime Molds ([Video](https://youtu.be/DYJ0R2PjZzM))
 
 In this project, I use compute shaders to allow for fast computation of individual simulated "agents". For exact information about how this project works, see [this video](https://www.youtube.com/watch?v=X-iSQQgOd1A&ab_channel=SebastianLague), which the project was based off of.
 
-## Primordial Particle System
+## Primordial Particle System ([Video](https://youtu.be/Tgjpnm_MpTU))
 
 This one is an implementation of a primordial particle system (PPS), where complex relationships can arise from very simple rules. I was attempting to recreate a simulation like [this one](https://www.youtube.com/watch?v=-c5XaC5-DXg&ab_channel=ScienceMathematics), but you're able to tune the parameters yourself and see if you can find some cool results.
 
