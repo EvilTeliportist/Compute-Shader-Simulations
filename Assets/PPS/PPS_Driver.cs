@@ -18,7 +18,7 @@ public class PPS_Driver : MonoBehaviour
     public RenderTexture renderTexture;
 
     // Initializing variables
-    public int numAgents = 100;
+    public int numAgents = 1000;
     public int width = 100;
     public int height = 100;
 
@@ -30,32 +30,20 @@ public class PPS_Driver : MonoBehaviour
     public float friction = .999f;
 
     private PPS_Agent[] agents;
-    private float[] weights;
     private ComputeBuffer buffer;
-    private ComputeBuffer weightBuffer;
     private ComputeBuffer colorBuffer;
+    ComputeBuffer weightBuffer;
 
     public Color[] available_colors = { Color.red, Color.green, Color.blue };
+    public float[] weights = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
+    public GameObject prefab;
+    private GameObject[] dots;
+
 
 
     public void Start()
     {
-
-        // Create color weight array
-        weights = new float[available_colors.Length * available_colors.Length];
-        for (int i = 0; i < weights.Length; i++)
-        {
-            weights[i] = Random.value + 1 * Mathf.Sign(Random.value - .5f);
-        }
-
-
-        for (int i = 0; i < available_colors.Length; i++)
-        {
-            weights[3 * i + i] = 0f;
-        }
-
-        Debug.Log(string.Join(" ", weights));
-
 
         // Initialize all agents
         agents = new PPS_Agent[numAgents];
@@ -69,6 +57,16 @@ public class PPS_Driver : MonoBehaviour
             agents[i] = agent;
         }
 
+        // Make all gameobjects
+        dots = new GameObject[numAgents];
+        for (int i = 0; i < numAgents; i++)
+        {
+            PPS_Agent agent = agents[i];
+            GameObject go = Instantiate(prefab, new Vector2(10 * agent.position.x / width, 10 * agent.position.y / height), Quaternion.identity);
+            go.GetComponent<SpriteRenderer>().color = available_colors[agent.color];
+            dots[i] = go;
+        }
+
         Debug.Log("Agents initialized");
 
         // Make buffer
@@ -76,15 +74,14 @@ public class PPS_Driver : MonoBehaviour
         buffer = new ComputeBuffer(numAgents, bufferSize);
         buffer.SetData(agents);
 
-        // Set weights buffer
-        int weightBufferSize = sizeof(float) * weights.Length;
-        weightBuffer = new ComputeBuffer(weights.Length, weightBufferSize);
-        weightBuffer.SetData(weights);
 
         // Set colors buffer
         int colorBufferSize = sizeof(float) * 4 * available_colors.Length;
         colorBuffer = new ComputeBuffer(available_colors.Length, colorBufferSize);
         colorBuffer.SetData(available_colors);
+
+        weightBuffer = new ComputeBuffer(weights.Length, sizeof(float) * weights.Length);
+        weightBuffer.SetData(weights);
 
     }
 
@@ -105,6 +102,8 @@ public class PPS_Driver : MonoBehaviour
         computerShader.SetBuffer(0, "weights", weightBuffer);
         computerShader.SetBuffer(0, "colors", colorBuffer);
 
+        weightBuffer.SetData(weights);
+
         computerShader.SetInt("width", width);
         computerShader.SetInt("height", height);
         computerShader.SetInt("numAgents", numAgents);
@@ -115,7 +114,23 @@ public class PPS_Driver : MonoBehaviour
         computerShader.SetFloat("sensingDistance", sensingDistance);
 
         computerShader.Dispatch(0, width / 8, height / 8, 1);
-        Graphics.Blit(renderTexture, dest);
+        Graphics.Blit(src, dest);
 
+        buffer.GetData(agents);
+
+        for (int i = 0; i < numAgents; i++)
+        {
+            PPS_Agent agent = agents[i];
+            GameObject go = dots[i];
+            go.transform.position = new Vector3((21 * agent.position.x / width) - 10.5f, (agent.position.y * 12 / height) - 6, 0);
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        Debug.Log("Application ending after " + Time.time + " seconds");
+        weightBuffer.Dispose();
+        buffer.Dispose();
+        colorBuffer.Dispose();
     }
 }

@@ -1,4 +1,8 @@
 Base path: 'C:/Program Files/Unity/2020.1.0f1/Editor/Data', plugins path 'C:/Program Files/Unity/2020.1.0f1/Editor/Data/PlaybackEngines'
 Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 15 at Shader.compute(84): signed/unsigned mismatch, unsigned assumed
+  error: 1 plat 15 at Shader.compute(92): signed/unsigned mismatch, unsigned assumed
+  api=15 insize=2442 outsize=5166 ok=1
 
 Quitting shader compiler process

@@ -36,11 +36,12 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\SlimeMold\MenuDriver.cs" />
+     <Compile Include="Assets\PPS\PPS_Driver.cs" />
      <Compile Include="Assets\Boids\GameController.cs" />
      <Compile Include="Assets\SlimeMold\ComputeShaderTest.cs" />
      <Compile Include="Assets\Boids\Boid.cs" />
-     <Compile Include="Assets\PPS\PPS_Driver.cs" />
+     <Compile Include="Assets\SlimeMold\SlimeMenuDriver.cs" />
+     <Compile Include="Assets\PPS\PPSMenuDriver.cs" />
      <None Include="Assets\SlimeMold\Shader.compute" />
      <None Include="Assets\PPS\Shader.compute" />
     <Reference Include="UnityEngine">

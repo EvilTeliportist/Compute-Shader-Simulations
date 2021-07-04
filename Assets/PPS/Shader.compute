@@ -49,7 +49,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 {
 
     // Set to black
-    Texture[id.xy] = float4(1,1,1,1);
+    Texture[id.xy] = float4(0,0,0,1);
 
     if (id.y * width + id.x >= numAgents){ return; }
 
