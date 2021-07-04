@@ -1,0 +1,99 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+
+struct Agent {
+    float2 position;
+    float2 velocity;
+    int color;
+};
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWStructuredBuffer<Agent> agents;
+RWStructuredBuffer<float> weights;
+RWStructuredBuffer<float4> colors;
+RWTexture2D<float4> Texture;
+
+uint width;
+uint height;
+uint numAgents;
+float deltaTime;
+
+float attraction;
+float friction;
+float sensingDistance;
+
+uint hash(uint state){
+    state ^= 2747636419u;
+    state *= 2654435769u;
+    state ^= state >> 16;
+    state *= 2654435769u;
+    state ^= state >> 16;
+    state *= 2654435769u;
+    return state;
+}
+
+float scaleToRange01(uint num){
+    return (float)num / (float)4294967295.0;
+}
+
+float dist(float2 a, float2 b){
+    float x = abs(a.x - b.x);
+    float y = abs(a.y - b.y);
+    return sqrt(x*x + y*y);
+}
+
+[numthreads(10,10,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+
+    // Set to black
+    Texture[id.xy] = float4(1,1,1,1);
+
+    if (id.y * width + id.x >= numAgents){ return; }
+
+    // Get agent
+    Agent agent = agents[id.y * width + id.x];
+    
+    // Calculate force
+    float2 force = float2(0, 0);
+    for (uint i = 0; i < agents.Length; i++){
+
+        float dist_between = dist(agent.position, agents[i].position);
+
+        // Dont check against itself
+        if (i == id.y * width + id.x || dist_between > sensingDistance){
+            continue;
+        }
+        force += ((agents[i].position - agent.position) * weights[agent.color * 3 + agents[i].color]) / (dist_between * dist_between);
+    }
+
+    // Calculate new velocity
+    agents[id.y * width + id.x].velocity = agent.velocity + force * .001 * attraction;
+    agents[id.y * width + id.x].velocity = agents[id.y * width + id.x].velocity * friction;
+
+    // Calculate new position
+    float2 newPos = agent.position + agent.velocity;
+
+    // Check bounds
+    if (newPos.x < 0){
+        newPos.x += width;
+    }
+
+    if (newPos.x > width){
+        newPos.x -= width;
+    }
+
+    if (newPos.y < 0){
+        newPos.y += height;
+    }
+
+    if (newPos.y > height){
+        newPos.y -= height;
+    }
+
+    // Update position and texture
+    agents[id.y * width + id.x].position = newPos;
+    Texture[agents[id.y * width + id.x].position] = colors[agent.color];
+}
